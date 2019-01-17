@@ -41,12 +41,14 @@ class SearchController extends Controller
         $resultArray=[];
         $occupationArray =[];
         $descriptionArray = [];
+        $finalarray =[];
         //$jsonArrayNew = ['profile'=>null, 'likely_occupation' =>null, 'description' =>null, 'img_src' =>null]; 
         $profiles=[];
         $occupations=[];
         $descriptions=[];
         $img_srcs=[];
         $sum = [];
+        $person =[];
         
         
 
@@ -122,85 +124,49 @@ class SearchController extends Controller
                                 if (((preg_match("~\b$input1\b~",$title))||(preg_match("~\b$search\b~",$title)))&&($snippetCount!=0))
                                 //if (((strpos($input1,$title))||(strpos($search,$title)))&&($snippetCount!=0))
                                 {
+                                   
                                     $sum[$x] = $sum[$x] + 30;
-                               
-                
                                     $snippetBody = $resultArray[$x]['snippet'];
                                     if  (strpos($title, '·')) {
                                         $newTit= explode(' · ', $title);
                                         array_push($titleArray1, $newTit[1]);
-                                        }
-                                        elseif  (strpos($title, ' | ')) {
+                                       
+                                        }elseif  (strpos($title, ' | ')) {
                                         $newTit= explode(' | ', $title);
                                         array_push($titleArray1, $newTit[1]);
+                                      
                                         }
                                         elseif  (strpos($title, '-')) {
                                             $newTit= explode(' - ', $title);
                                             array_push($titleArray1, $newTit[1]) ;
-                                        }elseif  (strpos($title, '•')) {
+                                       
+                                        }
+                                        elseif  (strpos($title, '•')) {
                                             $newTit= explode(' • ', $title);
                                             array_push($titleArray1, $newTit[1]) ;
+                                       
+                                        }else  {
+                                           
+                                            array_push($titleArray1, null) ;
+                                       
                                         }
-
-                                      
-                        
-
-                                    $snipppet = array_key_exists('snippet', $resultArray[$x]);
-                                    if ($snipppet){
-                                        $profile = $resultArray[$x]['snippet'];
-                                        //array_push($occupationArray, $occupation);
-                                        $profiles[$x] = $profile;
-                                        $sum[$x] = $sum[$x] + 10;
-                                      
-                                    } else{
-                                   
-                                        $profiles[$x]= NULL;
-                                        
-                                    }
-
-
-                                    // $hcards = array_key_exists('hcard', $resultArray[$x]['pagemap']);
-                                    // if ($hcards){
-                                    //     $occupation = $resultArray[$x]['pagemap']['hcard'][0]['title'];
-                                    //     //array_push($occupationArray, $occupation);
-                                    //     $occupations[$x] = $occupation;
-                                        
-                                    //     // $photoUrl = $resultArray[$x]['pagemap']['hcard'][0]['photo'];
-                                    //     // array_push($urlImgArray, $photoUrl);
-                                    // } else{
-                                    // // array_push($occupationArray, 'Not availabe');
-                                    //     $occupations[$x]= NULL;
-                                        
-                                    // }
-                                    
-                                    // $metatag = array_key_exists('og:title', $resultArray[$x]['pagemap']['metatags'][0]);
-                                    // if ($metatag){
-                                    //     $description = $resultArray[$x]['pagemap']['metatags'][0]['og:description'];
-                                    //     $descriptions[$x] = $description;
-                                        
-                                    //     //array_push($descriptionArray, $description);
-                                    // }else{
-                                    // // array_push($descriptionArray, 'Not availabe');
-                                    // $descriptions[$x] = NULL;
-                                    
-                                    // }
-
-                                    // $img_url = array_key_exists('cse_image', $resultArray[$x]['pagemap']);
-                                    // if ($img_url){
-                                    //     $img_src =  $resultArray[$x]['pagemap']['cse_image'][0]['src'];
-                                    //     //array_push($imageArray, $img_src);
-                                    //     $img_srcs[$x] = $img_src;
-                                    
-                                    // }else{
-                                    // // array_push($imageArray, 'Not availabe');
-                                    //     $img_srcs[$x] =  NULL;
-                                        
-                                    // }
                                   
+                                    $snipppet = array_key_exists('snippet', $resultArray[$x]);
+                                        if ($snipppet){
+                                            $profile = $resultArray[$x]['snippet'];
+                                            
+                                            $profiles[$x] = $profile;
+                                            $sum[$x] = $sum[$x] + 10;
+                                          
+                                        } else{
+                                       
+                                            $profiles[$x]= NULL;
+                                            
+                                        }
                                     $hcards = array_key_exists('hcard', $resultArray[$x]['pagemap']);
-
+    
                                     //checking if there is linkedin details to get likely occupation
-                                    if ($hcards){
+                                if ($hcards){
                                     $hcardss = array_key_exists('title',  $resultArray[$x]['pagemap']['hcard'][0]);
                                     $sum[$x] = $sum[$x] + 10;
                                     if ($hcardss){
@@ -221,7 +187,7 @@ class SearchController extends Controller
                                    //checking if there is facebook details to get likely description
                               
                                       $metatags = array_key_exists('og:description',  $resultArray[$x]['pagemap']['metatags'][0]);
-                                    //   $sum[$x] = $sum[$x] + 10;
+                                      $sum[$x] = $sum[$x] + 10;
                                       if ($metatags){
                                             $description = $resultArray[$x]['pagemap']['metatags'][0]['og:description'];
                                             
@@ -244,7 +210,105 @@ class SearchController extends Controller
                                     $img_srcs[$x] = NULL;
                                     
                                    }
+                                   $finalarray[$x] = array( 
+                                                            'profile' => $profiles[$x],
+                                                            'img_src' => $img_srcs[$x],
+                                                            'description' => $descriptions[$x], 
+                                                            'likely_occupation'=> $occupations[$x],
+                                                           // 'source'=>$titleArray1[$x],
+                                                            //'percentage'=>$sum[$x]
+                                                        );
+          
+                                //     $snippetBody = $resultArray[$x]['snippet'];
+                                //     if  (strpos($title, '·')) {
+                                //         $newTit= explode(' · ', $title);
+                                //         array_push($titleArray1, $newTit[1]);
+                                //         }
+                                //         elseif  (strpos($title, ' | ')) {
+                                //         $newTit= explode(' | ', $title);
+                                //         array_push($titleArray1, $newTit[1]);
+                                //         }
+                                //         elseif  (strpos($title, '-')) {
+                                //             $newTit= explode(' - ', $title);
+                                //             array_push($titleArray1, $newTit[1]) ;
+                                //         }elseif  (strpos($title, '•')) {
+                                //             $newTit= explode(' • ', $title);
+                                //             array_push($titleArray1, $newTit[1]) ;
+                                //         }
+
+                             
+                                //     $snipppet = array_key_exists('snippet', $resultArray[$x]);
+                                //     if ($snipppet){
+                                //         $profile = $resultArray[$x]['snippet'];
+                                //         //array_push($occupationArray, $occupation);
+                                //         $profiles[$x] = $profile;
+                                //         $sum[$x] = $sum[$x] + 10;
+                                      
+                                //     } else{
+                                   
+                                //         $profiles[$x]= NULL;
+                                        
+                                //     }
+
+
+                                  
+                                //     $hcards = array_key_exists('hcard', $resultArray[$x]['pagemap']);
+
+                                //     //checking if there is linkedin details to get likely occupation
+                                //     if ($hcards){
+                                //     $hcardss = array_key_exists('title',  $resultArray[$x]['pagemap']['hcard'][0]);
+                                //     $sum[$x] = $sum[$x] + 10;
+                                //     if ($hcardss){
+                                //         $occupation = $resultArray[$x]['pagemap']['hcard'][0]['title'];
+                                       
+                                //         $occupations[$x] = $occupation;
+                                //         $sum[$x] = $sum[$x] + 20;
+                                //         } else{
+                                //             $occupations[$x]= NULL;
+                                //         }
+                                    
+                                //    } else{
+                                   
+                                //     $occupations[$x]= NULL;
+                                    
+                                //    }
+                                 
+                                //    //checking if there is facebook details to get likely description
+                              
+                                //       $metatags = array_key_exists('og:description',  $resultArray[$x]['pagemap']['metatags'][0]);
+                                //     //   $sum[$x] = $sum[$x] + 10;
+                                //       if ($metatags){
+                                //             $description = $resultArray[$x]['pagemap']['metatags'][0]['og:description'];
+                                            
+                                //             $descriptions[$x] = $description;
+                                //             $sum[$x] = $sum[$x] + 20;
+                                //         } else{
+                                //             $descriptions[$x]= NULL;
+                                //             //$sum[$x] = $sum[$x] - 20;
+                                //         }
+                                   
+                                //    //Pushing image URLs to an array
+                                //    $img_url = array_key_exists('cse_image', $resultArray[$x]['pagemap']);
+                                //   if ($img_url){
+                                //     $img_src =  $resultArray[$x]['pagemap']['cse_image'][0]['src'];
+                                    
+                                //     $img_srcs[$x] = $img_src;
+                                //     $sum[$x] = $sum[$x] + 10;
+                                //   }else{
+                                
+                                //     $img_srcs[$x] = NULL;
+                                    
+                                //    }
+                                //    $finalarray[$x] =array( 
+                                //     'profile' => $profiles[$x],
+                                //     'img_src' => $img_srcs[$x],
+                                //     'description' => $descriptions[$x], 
+                                //     'likely_occupation'=> $occupations[$x],
+                                //     'source'=>$titleArray1[$x],
+                                //     'percentage'=>$sum[$x]
+                                // );
                                 }
+                              
                                 
 
                             //     $titleCount1 = (substr_count($title, $splitr[0]));
@@ -280,17 +344,12 @@ class SearchController extends Controller
                             //     }
                         }
 
-   
-            $merged = array_map(null,$profiles,$occupations,$descriptions,$img_srcs,$titleArray1,$sum);
-           
-        //     $collection = collect(['profile', 'occupation', 'description','img_src', 'source']);
+                        foreach($finalarray as $key =>$value){
+                            $key = $value; 
+                            print_r($finalarray);
+                        }
+                        //var_dump($finalarray);
 
-        //     $combined = $collection->combine([$jsonArrayNew1, $jsonArrayNew2, $jsonArrayNew3,$jsonArrayNew4,$titleArray1]);
-            
-        //   print_r($combined->all());
-           
-          
-  
                 $divisorCounter1 = count($titleArray1);
                 if ($divisorCounter1==0){
                     return json_encode([
@@ -301,7 +360,8 @@ class SearchController extends Controller
                     'status' => 200,
                     'search_name' => ucwords($search),
                     'Number of people' => $divisorCounter1,
-                    'results' => $merged,
+                    'results' => $finalarray,
+                    
               ]); 
                
       
@@ -326,13 +386,19 @@ class SearchController extends Controller
                                     $newTit= explode(' | ', $title);
                                     array_push($titleArray1, $newTit[1]);
                                   
-                                    }elseif  (strpos($title, '-')) {
-                                        $newTit= explode(' - ', $title);
-                                        array_push($titleArray1, $newTit[1]) ;
+                                    }
+                                    // elseif  (strpos($title, '-')) {
+                                    //     $newTit= explode(' - ', $title);
+                                    //     array_push($titleArray1, $newTit[1]) ;
                                    
-                                    }elseif  (strpos($title, '•')) {
+                                    // }
+                                    elseif  (strpos($title, '•')) {
                                         $newTit= explode(' • ', $title);
                                         array_push($titleArray1, $newTit[1]) ;
+                                   
+                                    }else  {
+                                       
+                                        array_push($titleArray1, null) ;
                                    
                                     }
                               
@@ -341,7 +407,7 @@ class SearchController extends Controller
                                         $profile = $resultArray[$x]['snippet'];
                                         
                                         $profiles[$x] = $profile;
-                                        //$sum[$x] = $sum[$x] + 10;
+                                        $sum[$x] = $sum[$x] + 10;
                                       
                                     } else{
                                    
@@ -358,7 +424,7 @@ class SearchController extends Controller
                                     $occupation = $resultArray[$x]['pagemap']['hcard'][0]['title'];
                                    
                                     $occupations[$x] = $occupation;
-                                   // $sum[$x] = $sum[$x] + 20;
+                                    $sum[$x] = $sum[$x] + 20;
                                     } else{
                                         $occupations[$x]= NULL;
                                     }
@@ -377,7 +443,7 @@ class SearchController extends Controller
                                         $description = $resultArray[$x]['pagemap']['metatags'][0]['og:description'];
                                         
                                         $descriptions[$x] = $description;
-                                       // $sum[$x] = $sum[$x] + 20;
+                                        $sum[$x] = $sum[$x] + 20;
                                     } else{
                                         $descriptions[$x]= NULL;
                                         //$sum[$x] = $sum[$x] - 20;
@@ -389,45 +455,53 @@ class SearchController extends Controller
                                 $img_src =  $resultArray[$x]['pagemap']['cse_image'][0]['src'];
                                 
                                 $img_srcs[$x] = $img_src;
-                               // $sum[$x] = $sum[$x] + 10;
+                                $sum[$x] = $sum[$x] + 10;
                               }else{
                             
                                 $img_srcs[$x] = NULL;
                                 
                                }
-                                if (( $img_srcs[$x] != NULL)&& ( $occupations[$x] != NULL)&&($profiles[$x] != NULL)&&($descriptions[$x]!= NULL)){
-                                    $sum[$x] = $sum[$x] + 70;
-                                }elseif (( $img_srcs[$x] != NULL)&& ( $occupations[$x] != NULL)&&($profiles[$x] != NULL)&&($descriptions[$x]= NULL)){
-                                    $sum[$x] = $sum[$x] + 60;
-                                }elseif(( $img_srcs[$x] != NULL)&& ( $occupations[$x] != NULL)&&($profiles[$x] = NULL)&&($descriptions[$x]!= NULL)){
-                                    $sum[$x] = $sum[$x] + 50;
-                                }elseif(( $img_srcs[$x] != NULL)&& ( $occupations[$x] = NULL)&&($profiles[$x] != NULL)&&($descriptions[$x]!= NULL)){
-                                    $sum[$x] = $sum[$x] + 50;
-                                }elseif(( $img_srcs[$x] = NULL)&& ( $occupations[$x] != NULL)&&($profiles[$x] != NULL)&&($descriptions[$x]!= NULL)){
-                                    $sum[$x] = $sum[$x] + 50;
-                                }elseif(( $img_srcs[$x] != NULL)&& ( $occupations[$x] != NULL)&&($profiles[$x]== NULL)&&($descriptions[$x]== NULL)){
-                                    $sum[$x] = $sum[$x] + 40;
-                                }elseif(( $img_srcs[$x] != NULL)&& ( $occupations[$x] == NULL)&&($profiles[$x]!= NULL)&&($descriptions[$x]== NULL)){
-                                    $sum[$x] = $sum[$x] + 40;
-                                }elseif(( $img_srcs[$x] == NULL)&& ( $occupations[$x] != NULL)&&($profiles[$x] != NULL)&&($descriptions[$x]== NULL)){
-                                    $sum[$x] = $sum[$x] + 40;
-                                }elseif(( $img_srcs[$x] != NULL)&& ( $occupations[$x] == NULL)&&($profiles[$x] == NULL)&&($descriptions[$x]!= NULL)){
-                                    $sum[$x] = $sum[$x] + 30;
-                                }elseif(( $img_srcs[$x] == NULL)&& ( $occupations[$x] != NULL)&&($profiles[$x] == NULL)&&($descriptions[$x]!= NULL)){
-                                    $sum[$x] = $sum[$x] + 30;
-                                }elseif(( $img_srcs[$x] == NULL)&& ( $occupations[$x] == NULL)&&($profiles[$x] != NULL)&&($descriptions[$x]!= NULL)){
-                                    $sum[$x] = $sum[$x] + 30;
-                                } elseif(( $img_srcs[$x] == NULL)&& ( $occupations[$x] == NULL)&&($profiles[$x] == NULL)&&($descriptions[$x]!= NULL)){
-                                    $sum[$x] = $sum[$x] + 10;
-                                }elseif(( $img_srcs[$x] == NULL)&& ( $occupations[$x] == NULL)&&($profiles[$x] != NULL)&&($descriptions[$x]==NULL)){
-                                    $sum[$x] = $sum[$x] + 20;
-                                }elseif(( $img_srcs[$x] == NULL)&& ( $occupations[$x] != NULL)&&($profiles[$x] == NULL)&&($descriptions[$x]== NULL)){
-                                    $sum[$x] = $sum[$x] + 20;
-                                }elseif(( $img_srcs[$x] != NULL)&& ( $occupations[$x] == NULL)&&($profiles[$x] == NULL)&&($descriptions[$x]== NULL)){
-                                    $sum[$x] = $sum[$x] + 20;
-                                }elseif(( $img_srcs[$x] == NULL)&& ( $occupations[$x] == NULL)&&($profiles[$x] == NULL)&&($descriptions[$x]== NULL)){
-                                    $sum[$x] = $sum[$x] + 00;
-                                }
+                               $finalarray[$x] =array( 
+                                                        'profile' => $profiles[$x],
+                                                        'img_src' => $img_srcs[$x],
+                                                        'description' => $descriptions[$x], 
+                                                        'likely_occupation'=> $occupations[$x],
+                                                       // 'source'=>$titleArray1[$x],
+                                                        'percentage'=>$sum[$x]
+                                                    );
+                                // if (( $img_srcs[$x] != NULL)&& ( $occupations[$x] != NULL)&&($profiles[$x] != NULL)&&($descriptions[$x]!= NULL)){
+                                //     $sum[$x] = $sum[$x] + 70;
+                                // }elseif (( $img_srcs[$x] != NULL)&& ( $occupations[$x] != NULL)&&($profiles[$x] != NULL)&&($descriptions[$x]= NULL)){
+                                //     $sum[$x] = $sum[$x] + 60;
+                                // }elseif(( $img_srcs[$x] != NULL)&& ( $occupations[$x] != NULL)&&($profiles[$x] = NULL)&&($descriptions[$x]!= NULL)){
+                                //     $sum[$x] = $sum[$x] + 50;
+                                // }elseif(( $img_srcs[$x] != NULL)&& ( $occupations[$x] = NULL)&&($profiles[$x] != NULL)&&($descriptions[$x]!= NULL)){
+                                //     $sum[$x] = $sum[$x] + 50;
+                                // }elseif(( $img_srcs[$x] = NULL)&& ( $occupations[$x] != NULL)&&($profiles[$x] != NULL)&&($descriptions[$x]!= NULL)){
+                                //     $sum[$x] = $sum[$x] + 50;
+                                // }elseif(( $img_srcs[$x] != NULL)&& ( $occupations[$x] != NULL)&&($profiles[$x]== NULL)&&($descriptions[$x]== NULL)){
+                                //     $sum[$x] = $sum[$x] + 40;
+                                // }elseif(( $img_srcs[$x] != NULL)&& ( $occupations[$x] == NULL)&&($profiles[$x]!= NULL)&&($descriptions[$x]== NULL)){
+                                //     $sum[$x] = $sum[$x] + 40;
+                                // }elseif(( $img_srcs[$x] == NULL)&& ( $occupations[$x] != NULL)&&($profiles[$x] != NULL)&&($descriptions[$x]== NULL)){
+                                //     $sum[$x] = $sum[$x] + 40;
+                                // }elseif(( $img_srcs[$x] != NULL)&& ( $occupations[$x] == NULL)&&($profiles[$x] == NULL)&&($descriptions[$x]!= NULL)){
+                                //     $sum[$x] = $sum[$x] + 30;
+                                // }elseif(( $img_srcs[$x] == NULL)&& ( $occupations[$x] != NULL)&&($profiles[$x] == NULL)&&($descriptions[$x]!= NULL)){
+                                //     $sum[$x] = $sum[$x] + 30;
+                                // }elseif(( $img_srcs[$x] == NULL)&& ( $occupations[$x] == NULL)&&($profiles[$x] != NULL)&&($descriptions[$x]!= NULL)){
+                                //     $sum[$x] = $sum[$x] + 30;
+                                // } elseif(( $img_srcs[$x] == NULL)&& ( $occupations[$x] == NULL)&&($profiles[$x] == NULL)&&($descriptions[$x]!= NULL)){
+                                //     $sum[$x] = $sum[$x] + 10;
+                                // }elseif(( $img_srcs[$x] == NULL)&& ( $occupations[$x] == NULL)&&($profiles[$x] != NULL)&&($descriptions[$x]==NULL)){
+                                //     $sum[$x] = $sum[$x] + 20;
+                                // }elseif(( $img_srcs[$x] == NULL)&& ( $occupations[$x] != NULL)&&($profiles[$x] == NULL)&&($descriptions[$x]== NULL)){
+                                //     $sum[$x] = $sum[$x] + 20;
+                                // }elseif(( $img_srcs[$x] != NULL)&& ( $occupations[$x] == NULL)&&($profiles[$x] == NULL)&&($descriptions[$x]== NULL)){
+                                //     $sum[$x] = $sum[$x] + 20;
+                                // }elseif(( $img_srcs[$x] == NULL)&& ( $occupations[$x] == NULL)&&($profiles[$x] == NULL)&&($descriptions[$x]== NULL)){
+                                //     $sum[$x] = $sum[$x] + 00;
+                                // }
                             }
                             
                             
@@ -439,13 +513,12 @@ class SearchController extends Controller
                                     'error'=> 'Sorry, we could not find the name. Kindly, check for other names'
                                 ]);
                         }
-                        //combining all the results array in an array for mapping
-                         $merged = array_map(null,$profiles,$occupations,$descriptions,$img_srcs,$titleArray1,$sum);
-                        return json_encode([
+                      
+                         return json_encode([
                             'status' => 200,
                             'search_name' => ucwords($search),
                             'Number of people' => $divisorCounter1,
-                            'results'=>$merged,
+                            'results' => $finalarray
                         
                         ]); 
                          
